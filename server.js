@@ -15,7 +15,7 @@ server.use(express.json());
 
 //IP : http://localhost:PORT
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 
 // const mongoURL = process.env.MONGO
 // // mongoose config
@@ -48,22 +48,22 @@ server.get('/news', getNews)
 server.get('*', defualtHandler);
 
 
-// http://localhost:3000/
+// http://localhost:3001/
 function homeHandler(req, res) {
   res.send("Hi from the home route");
 }
 
-// http://localhost:3000/test
+// http://localhost:3001/test
 function testHandler(req, res) {
   res.status(200).send("You are requesting the test route");
 }
 
-// http://localhost:3000/*
+// http://localhost:3001/*
 function defualtHandler(req, res) {
   res.status(404).send("Sorry, Page not found");
 }
 
-// http://localhost:3000/news
+// http://localhost:3001/news
 async function getNews(req, res) {
   let allArticles = []
     for (const news of allNews) {
