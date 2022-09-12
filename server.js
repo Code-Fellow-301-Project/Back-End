@@ -14,7 +14,7 @@ server.use(cors()); //make my server open for any request
 server.use(express.json());
 
 //IP : http://localhost:PORT
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 
 const mongoURL = process.env.MONGO
 // mongoose config
@@ -72,8 +72,6 @@ server.get('/posts', postHandler);
 server.post('/posts', addPostHandler);
 server.delete('/posts/:id', deletePostsHandler);
 server.put('/posts/:id', updatePostHandler);
-
-
 
 // http://localhost:3001/
 function homeHandler(req, res) {
