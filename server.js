@@ -3,7 +3,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { response } = require('express');
+const { response, query } = require('express');
 const mongoose = require('mongoose'); // 0 - import mongoose
 const { parse } = require('dotenv');
 const axios = require('axios');
@@ -14,80 +14,121 @@ server.use(cors()); //make my server open for any request
 server.use(express.json());
 
 //IP : http://localhost:PORT
-
 const PORT = process.env.PORT;
 
-// const mongoURL = process.env.MONGO
-// // mongoose config
-// mongoose.connect(`${mongoURL}`, { useNewUrlParser: true, useUnifiedTopology: true }); // 1 - connect mongoose with DB (301d35-books)
+const mongoURL = process.env.MONGO
+// mongoose config
+mongoose.connect(`${mongoURL}`, { useNewUrlParser: true, useUnifiedTopology: true }); // 1 - connect mongoose with DB (301d35-books)
 
-// const bookSchema = new mongoose.Schema({ //define the schema (structure)
-//   title: String,
-//   description: String,
-//   status: String
-// });
+const postSchema = new mongoose.Schema({ //define the schema (structure)
+  title: String,
+  description: String,
+  name: String
+});
 
-// const BookModel = mongoose.model('Book', bookSchema); //compile the schema into a model
+const PostModel = mongoose.model('Post', postSchema); //compile the schema into a model
 
 //seed data (insert initial data)
+async function seedData() {
+  const firstPost = new PostModel({
+    title: "Dummy Post 1",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
+    name: "Dummy user 1",
+  })
 
-// async function seedData() {
+  const secondPost = new PostModel({
+    title: "Dummy Post 2",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
+    name: "Dummy user 2",
+  })
 
+  const thirdPost = new PostModel({
+    title: "Dummy Post 3",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
+    name: "Dummy user 3",
+  })
 
-//   await firstBook.save();
-//   await secondBook.save();
-//   await thirdBook.save();
-// }
+  const fourthPost = new PostModel({
+    title: "Dummy Post 4",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
+    name: "Dummy user 4",
+  })
+
+  await firstPost.save();
+  await secondPost.save();
+  await thirdPost.save();
+  await fourthPost.save();
+}
 
 // seedData();
 
 //Routes
 server.get('/', homeHandler);
 server.get('/test', testHandler);
-server.get('/news', getNews)
+server.get('/news', getNews);
+server.get('/searchNews', searchNews);
 server.get('*', defualtHandler);
+server.get('/posts', postHandler);
+server.post('/posts', addPostHandler);
+server.delete('/posts/:id', deletePostsHandler);
+server.put('/posts/:id', updatePostHandler);
 
 
-// http://localhost:3000/
+
+// http://localhost:3001/
 function homeHandler(req, res) {
   res.send("Hi from the home route");
 }
 
-// http://localhost:3000/test
+// http://localhost:3001/test
 function testHandler(req, res) {
   res.status(200).send("You are requesting the test route");
 }
 
-// http://localhost:3000/*
+// http://localhost:3001/*
 function defualtHandler(req, res) {
   res.status(404).send("Sorry, Page not found");
 }
 
-// http://localhost:3000/news
+// http://localhost:3001/news
 async function getNews(req, res) {
   let allArticles = []
-    for (const news of allNews) {
-      let articles = await news.getNews()
-      allArticles.push(...articles)
-    }
-    res.send(allArticles)
+  for (const news of allNews) {
+    let articles = await news.getNews()
+    allArticles.push(...articles)
+  }
+  res.send(allArticles)
 }
 
-// listener
-server.listen(PORT, () => {
-  console.log(`Listening on ${PORT}`);
-})
+// http://localhost:3001/searchNews?query=query
+async function searchNews(req, res) {
+  let allArticles = []
+  for (const news of allNews) {
+    let articles = await news.searchNews(req.query.query);
+    allArticles.push(...articles)
+  }
+  res.send(allArticles)
+}
 
 class NewsAPI {
   async getNews() {
-    var result = await axios.get(`https://newsapi.org/v2/everything?q=default&apiKey=${process.env.NEWSAPI_KEY}`)
-    return this.parseArticles(result)
+    try {
+      var result = await axios.get(`https://newsapi.org/v2/everything?q=default&apiKey=${process.env.NEWSAPI_KEY}`)
+      return this.parseArticles(result)
+    } catch (e) {
+      console.log(e);
+      console.log("error in NewsAPI articles");
+    }
   }
   async searchNews(query) {
-    var result = await axios.get(`https://newsapi.org/v2/everything?q=${query}&apiKey=${process.env.NEWSAPI_KEY}`)
-    return this.parseArticles(result);
+    try {
+      var result = await axios.get(`https://newsapi.org/v2/everything?q=${query}&apiKey=${process.env.NEWSAPI_KEY}`)
+      return this.parseArticles(result);
+    } catch (e) {
+      console.log(e);
+      console.log("error in NewsAPI search");
+    }
   }
-
   parseArticles(res) {
     return res.data.articles.map((article) => {
       return new Article(article.title, article.description, article.content, article.image, article.publishedAt, article.source.name, article.url)
@@ -97,14 +138,23 @@ class NewsAPI {
 
 class GNews {
   async getNews() {
-    var result = await axios.get(`https://gnews.io/api/v4/search?q=default&token=${process.env.GNEWS_API_KEY}`)
-    return this.parseArticles(result)
+    try {
+      var result = await axios.get(`https://gnews.io/api/v4/search?q=default&token=${process.env.GNEWS_API_KEY}`)
+      return this.parseArticles(result)
+    } catch (e) {
+      console.log(e);
+      console.log("error in getting GNews articles");
+    }
   }
   async searchNews(query) {
-    var result = await axios.get(`https://gnews.io/api/v4/search?q=${query}&token=${process.env.GNEWS_API_KEY}`)
-    return this.parseArticles(result);
+    try {
+      var result = await axios.get(`https://gnews.io/api/v4/search?q=${query}&token=${process.env.GNEWS_API_KEY}`)
+      return this.parseArticles(result);
+    } catch (e) {
+      console.log(e);
+      console.log("error in GNews search");
+    }
   }
-
   parseArticles(res) {
     return res.data.articles.map((article) => {
       return new Article(article.title, article.description, article.content, article.image, article.publishedAt, article.source.name, article.url)
@@ -126,3 +176,76 @@ class Article {
     this.url = url;
   }
 }
+
+function postHandler(req, res) {
+  const name = req.query.name
+  PostModel.forEach((err, result) => {
+    if (err) {
+      console.log(err)
+    }
+    else {
+      console.log(result);
+      res.send(result)
+    }
+  })
+}
+
+async function addPostHandler(req, res) {
+  const { title, description, name } = req.body;
+  await PostModel.create({
+    title: title,
+    description: description,
+    name: name,
+  });
+  PostModel.forEach((err, result) => {
+    if (err) {
+      console.log(err)
+    }
+    else {
+      console.log(result);
+      res.send(result)
+    }
+  })
+}
+
+function deletePostsHandler(req, res) {
+  const postID = req.params.id;
+  book.deleteOne({ _id: postID }, (err, result) => {
+    book.forEach((err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log(result);
+        res.send(result);
+      }
+    })
+
+  })
+
+}
+
+function updatePostHandler(req, res) {
+  const postID = req.params.id;
+  const { title, description, name } = req.body;
+  book.findByIdAndUpdate(postID, { title, description, name }, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      book.forEach((err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        else {
+          res.send(result);
+        }
+      })
+    }
+  })
+
+}
+
+// listener
+server.listen(PORT, () => {
+  console.log(`Listening on ${PORT}`);
+})
