@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3001;
 
 const mongoURL = process.env.MONGO
 // mongoose config
-mongoose.connect(`${mongoURL}`, { useNewUrlParser: true, useUnifiedTopology: true }); // 1 - connect mongoose with DB (301d35-books)
+mongoose.connect(`${mongoURL}`, { useNewUrlParser: true, useUnifiedTopology: true }); // 1 - connect mongoose with DB (atlas)
 
 const postSchema = new mongoose.Schema({ //define the schema (structure)
   title: String,
@@ -67,11 +67,11 @@ server.get('/', homeHandler);
 server.get('/test', testHandler);
 server.get('/news', getNews);
 server.get('/searchNews', searchNews);
+server.get('/getPosts', postHandler);
+server.post('/addPost', addPostHandler);
+server.delete('/deletePost/:id', deletePostsHandler);
+server.put('/updatePost/:id', updatePostHandler);
 server.get('*', defualtHandler);
-server.get('/posts', postHandler);
-server.post('/posts', addPostHandler);
-server.delete('/posts/:id', deletePostsHandler);
-server.put('/posts/:id', updatePostHandler);
 
 // http://localhost:3001/
 function homeHandler(req, res) {
@@ -129,7 +129,7 @@ class NewsAPI {
   }
   parseArticles(res) {
     return res.data.articles.map((article) => {
-      return new Article(article.title, article.description, article.content, article.image, article.publishedAt, article.source.name, article.url)
+      return new Article(article.title, article.description, article.content, article.urlToImage, article.publishedAt, article.source.name, article.url)
     });
   }
 }
@@ -208,8 +208,8 @@ async function addPostHandler(req, res) {
 
 function deletePostsHandler(req, res) {
   const postID = req.params.id;
-  book.deleteOne({ _id: postID }, (err, result) => {
-    book.forEach((err, result) => {
+  PostModel.deleteOne({ _id: postID }, (err, result) => {
+    PostModel.find({}, (err, result) => {
       if (err) {
         console.log(err);
       }
@@ -226,11 +226,11 @@ function deletePostsHandler(req, res) {
 function updatePostHandler(req, res) {
   const postID = req.params.id;
   const { title, description, name } = req.body;
-  book.findByIdAndUpdate(postID, { title, description, name }, (err, result) => {
+  PostModel.findByIdAndUpdate(postID, { title, description, name }, (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      book.forEach((err, result) => {
+      PostModel.find({}, (err, result) => {
         if (err) {
           console.log(err);
         }
