@@ -28,6 +28,7 @@ const postSchema = new mongoose.Schema({
   title: String,
   description: String,
   name: String,
+  email: String,
 });
 
 const PostModel = mongoose.model("Post", postSchema); //compile the schema into a model
@@ -39,6 +40,7 @@ async function seedData() {
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 1",
+    email: "Admin",
   });
 
   const secondPost = new PostModel({
@@ -46,6 +48,7 @@ async function seedData() {
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 2",
+    email: "Admin",
   });
 
   const thirdPost = new PostModel({
@@ -53,6 +56,7 @@ async function seedData() {
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 3",
+    email: "Admin",
   });
 
   const fourthPost = new PostModel({
@@ -60,6 +64,7 @@ async function seedData() {
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 4",
+    email: "Admin",
   });
 
   await firstPost.save();
@@ -75,9 +80,10 @@ server.get("/", homeHandler);
 server.get("/test", testHandler);
 server.get("/news", getNews);
 server.get("/searchNews", searchNews);
-server.get("/getPosts", postHandler);
+server.get("/getPosts", postHandler); // get all posts
+// server.get("/getCurrentUserPosts/:email",CurrentUserPostsHandler) // get current users posts
 server.post("/addPost", addPostHandler);
-server.delete("/deletePost/:id", deletePostsHandler);
+server.delete("/deletePost/:id", deletePostsHandler); // delete based on id and email
 server.put("/updatePost/:id", updatePostHandler);
 server.get("*", defualtHandler);
 
@@ -126,6 +132,7 @@ class NewsAPI {
     } catch (e) {
       console.log(e);
       console.log("error in NewsAPI articles");
+      return [];
     }
   }
   async searchNews(query) {
@@ -137,6 +144,7 @@ class NewsAPI {
     } catch (e) {
       console.log(e);
       console.log("error in NewsAPI search");
+      return [];
     }
   }
   parseArticles(res) {
@@ -164,6 +172,7 @@ class GNews {
     } catch (e) {
       console.log(e);
       console.log("error in getting GNews articles");
+      return [];
     }
   }
   async searchNews(query) {
@@ -175,6 +184,7 @@ class GNews {
     } catch (e) {
       console.log(e);
       console.log("error in GNews search");
+      return [];
     }
   }
   parseArticles(res) {
@@ -192,8 +202,7 @@ class GNews {
   }
 }
 
-const allNews = [new NewsAPI()];
-// const allNews = [new GNews()]
+const allNews = [new NewsAPI(), new GNews()];
 
 class Article {
   constructor(headline, description, content, image, date, source, url) {
@@ -209,7 +218,6 @@ class Article {
 
 function postHandler(req, res) {
   console.log("get");
-  // const name = req.query.name
   PostModel.find({}, (err, result) => {
     if (err) {
       console.log(err);
@@ -220,12 +228,25 @@ function postHandler(req, res) {
   });
 }
 
+// function CurrentUserPostsHandler(req, res) {
+//   const email = req.params.email;
+//   PostModel.find({ email: email }, (err, result) => {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       res.send(result);
+//       console.log(result);
+//     }
+//   });
+// }
+
 async function addPostHandler(req, res) {
-  const { title, description, name } = req.body;
+  const { title, description, name, email } = req.body;
   await PostModel.create({
     title: title,
     description: description,
     name: name,
+    email: email,
   });
   PostModel.find({}, (err, result) => {
     if (err) {
@@ -253,10 +274,10 @@ function deletePostsHandler(req, res) {
 
 function updatePostHandler(req, res) {
   const postID = req.params.id;
-  const { title, description, name } = req.body; // destructuring assignment
+  const { title, description, name, email } = req.body; // destructuring assignment
   PostModel.findByIdAndUpdate(
     postID,
-    { title, description, name },
+    { title, description, name, email },
     (err, result) => {
       if (err) {
         console.log(err);
