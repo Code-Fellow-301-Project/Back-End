@@ -29,6 +29,7 @@ const postSchema = new mongoose.Schema({
   description: String,
   name: String,
   email: String,
+  image: String
 });
 
 const PostModel = mongoose.model("Post", postSchema); //compile the schema into a model
@@ -41,6 +42,7 @@ async function seedData() {
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 1",
     email: "Admin",
+    image: "img_url"
   });
 
   const secondPost = new PostModel({
@@ -49,6 +51,7 @@ async function seedData() {
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 2",
     email: "Admin",
+    image: "img_url"
   });
 
   const thirdPost = new PostModel({
@@ -57,6 +60,7 @@ async function seedData() {
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 3",
     email: "Admin",
+    image: "img_url"
   });
 
   const fourthPost = new PostModel({
@@ -65,6 +69,7 @@ async function seedData() {
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 4",
     email: "Admin",
+    image: "img_url"
   });
 
   await firstPost.save();
@@ -241,12 +246,13 @@ function postHandler(req, res) {
 // }
 
 async function addPostHandler(req, res) {
-  const { title, description, name, email } = req.body;
+  const { title, description, name, email,image } = req.body;
   await PostModel.create({
     title: title,
     description: description,
     name: name,
     email: email,
+    image: image
   });
   PostModel.find({}, (err, result) => {
     if (err) {
@@ -274,10 +280,10 @@ function deletePostsHandler(req, res) {
 
 function updatePostHandler(req, res) {
   const postID = req.params.id;
-  const { title, description, name, email } = req.body; // destructuring assignment
+  const { title, description, name, email,image } = req.body; // destructuring assignment
   PostModel.findByIdAndUpdate(
     postID,
-    { title, description, name, email },
+    { title, description, name, email,image },
     (err, result) => {
       if (err) {
         console.log(err);
