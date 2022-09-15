@@ -41,7 +41,7 @@ async function seedData() {
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 1",
-    email: "Admin",
+    email: "mabed3819@gmail.com",
     image: "img_url"
   });
 
@@ -50,7 +50,7 @@ async function seedData() {
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 2",
-    email: "Admin",
+    email: "mabed3819@gmail.com",
     image: "img_url"
   });
 
@@ -59,7 +59,7 @@ async function seedData() {
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 3",
-    email: "Admin",
+    email: "mabed3819@gmail.com",
     image: "img_url"
   });
 
@@ -68,7 +68,7 @@ async function seedData() {
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     name: "Dummy user 4",
-    email: "Admin",
+    email: "mabed3819@gmail.com",
     image: "img_url"
   });
 
@@ -222,7 +222,6 @@ class Article {
 }
 
 function postHandler(req, res) {
-  console.log("get");
   PostModel.find({}, (err, result) => {
     if (err) {
       console.log(err);
